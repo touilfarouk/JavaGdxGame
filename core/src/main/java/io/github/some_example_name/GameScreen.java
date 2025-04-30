@@ -19,7 +19,10 @@ public class GameScreen implements Screen {
     private Texture background;
 
     // timing
-    private float backgroundOffset;
+    //private float backgroundOffset;
+    private Texture[] backgrounds;
+    private float[] backgroundOffsets = {0,0,0,0};
+    private float getBackgroundMaxScrollSpeed;
     private float backgroundScrollSpeed = 30f; // pixels per second
 
     // world parameters
@@ -29,24 +32,42 @@ public class GameScreen implements Screen {
     GameScreen() {
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
-        background = new Texture("darkPurpleStarscape.png");
-        backgroundOffset = 0;
+        //background = new Texture("darkPurpleStarscape.png");
+        //backgroundOffset = 0;
+        backgrounds = new Texture[4];
+        backgrounds[0] = new Texture("Starscape00.png");
+        backgrounds[1] = new Texture("Starscape01.png");
+        backgrounds[2] = new Texture("Starscape02.png");
+        backgrounds[3] = new Texture("Starscape03.png");
+        getBackgroundMaxScrollSpeed = (float)(WORLD_HEIGHT)/4;
+
         batch = new SpriteBatch();
     }
 
     @Override
-    public void render(float delta) {
-        backgroundOffset += backgroundScrollSpeed * delta;
-        backgroundOffset %= WORLD_HEIGHT;
+    public void render(float deltaTime) {
 
-        batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        // draw 2 backgrounds for seamless scrolling
-        batch.draw(background, 0, -backgroundOffset, WORLD_WIDTH, WORLD_HEIGHT);
-        batch.draw(background, 0, -backgroundOffset + WORLD_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);
+        renderBackgrounds(deltaTime);
 
         batch.end();
+    }
+    private void renderBackgrounds(float deltaTime) {
+        backgroundOffsets[0] +=deltaTime * backgroundScrollSpeed / 8;
+        backgroundOffsets[1] +=deltaTime * backgroundScrollSpeed / 4;
+        backgroundOffsets[2] +=deltaTime * backgroundScrollSpeed / 2;
+        backgroundOffsets[3] +=deltaTime * backgroundScrollSpeed;
+    for (int layer = 0; layer < backgroundOffsets.length; layer++){
+        if (backgroundOffsets[layer] > WORLD_HEIGHT){
+            backgroundOffsets[layer] = 0;
+        }
+        batch.draw(backgrounds[layer], 0, -backgroundOffsets[layer] , WORLD_WIDTH, WORLD_HEIGHT);
+        batch.draw(backgrounds[layer], 0, -backgroundOffsets[layer] + WORLD_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);
+
+    }
+
+
     }
 
     @Override
